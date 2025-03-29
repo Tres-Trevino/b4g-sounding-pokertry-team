@@ -21,6 +21,8 @@ def pairwise(iterable):
 
 # Ace is ?, King is >, etc.
 HAND_TRANSFORM = str.maketrans("AKQJT", "?>=<;")
+RANKS = '23456789TJQKA'
+SUITS = 'hdcs'
 
 class Player(Bot):
     '''
@@ -128,6 +130,51 @@ class Player(Bot):
             
             return FoldAction
         
+
+    # this function assumes that the hand is not a winning hand
+    def get_hand_odds(self, my_cards, community_cards) -> float:
+        cards = my_cards + community_cards
+        strcards = ''.join(cards)
+
+        n_hidden_cards = 52 - len(cards)
+        rank_occurrences = {s: strcards.count(s) for s in (c[0] for c in cards)}
+        n_pairs = list(rank_occurrences.values()).count(2)
+
+        # flush draw
+        is_flush_draw = any(strcards.count(s) == 4 for s in SUITS)
+
+        # straight draw
+        for r in RANKS:
+            new_cards = cards + [r + 'h']
+            ranks_sorted = self.rank_to_ascii_sorted(new_cards)
+            if self.is_straight(ranks_sorted):
+                is_straight_draw = True
+                break
+        else:
+            is_straight_draw = False
+
+        if is_flush_draw and is_straight_draw:
+            return 15 / n_hidden_cards
+        if is_flush_draw:
+            return 9 / n_hidden_cards
+        if is_straight_draw:
+            return 6 / n_hidden_cards
+
+        # two pair -> full house
+        if n_pairs >= 2:
+            return 4 / n_hidden_cards
+
+        # pair -> three of a kind
+        if n_pairs == 1:
+            return 2 / n_hidden_cards
+
+
+
+    def get_pot_odds(self, my_contrib, opp_contrib, cont_cost) -> float:
+        pot = my_contrib + opp_contrib
+        pot_pot = pot + cont_cost
+        return cont_cost / pot_pot
+
     def have_winning_hand(self, my_cards, community_cards):
         
         total_cards = my_cards + community_cards
@@ -150,8 +197,7 @@ class Player(Bot):
             return True # we have a straight
             
         # check for flush
-        suits = "hdcs"
-        for suit in suits:
+        for suit in SUITS:
             if total_cards_str.count(suit) >= 5:
                 return True # we have a flush
         
