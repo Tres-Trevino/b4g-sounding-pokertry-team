@@ -118,11 +118,11 @@ class Player(Bot):
             for s in (c[0] for c in my_cards):
                 num = "".join(my_cards).count(s)
                 if (num >= 2):
-                    return self.get_legal_raise(20, min_raise, max_raise)
+                    return self.get_legal_raise(200, min_raise, max_raise)
                 
             # if contains all broadway cards, good
             if all(c[0] in "AKQJT" for c in my_cards):
-                return self.get_legal_raise(10, min_raise, max_raise)
+                return self.get_legal_raise(100, min_raise, max_raise)
                         
             # all same suit
             all_same_suit = my_cards[0][1] == my_cards[1][1] and my_cards[1][1] == my_cards[2][1]
