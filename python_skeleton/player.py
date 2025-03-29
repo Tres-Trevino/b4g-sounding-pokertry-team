@@ -9,15 +9,14 @@ from skeleton.runner import parse_args, run_bot
 
 import random
 
+# Ace is ?, King is >, etc.
+HAND_TRANSFORM = str.maketrans("AKQJT", "?>=<;")
 
 class Player(Bot):
     '''
     A pokerbot.
     '''
     
-    # Ace is ?, King is >, etc.
-    HAND_TRANSFORM = str.maketrans("AKQJT", "?>=<;")
-
     def __init__(self):
         '''
         Called when a new game starts. Called exactly once.
