@@ -161,12 +161,14 @@ class Player(Bot):
         attempt = min(max_raise, max(attempt_raise, min_raise))
         return RaiseAction(amount=attempt)
     
+
     def attempt_check(self, legal_actions):
         if (random.randint(0, 15) == 7):
             return RaiseAction(random.randint(20, 30))
         
         return CheckAction() if CheckAction in legal_actions else CallAction()
     
+
     def attempt_fold(self, legal_actions):
         if CheckAction in legal_actions:
             return CheckAction()

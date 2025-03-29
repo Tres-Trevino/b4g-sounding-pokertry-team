@@ -134,7 +134,7 @@ class Player(Bot):
             straight_draw = card_range <= 4
             
             if straight_draw and all_same_suit:
-                return CheckAction() if CheckAction in legal_actions else CallAction()
+                return self.attempt_check(legal_actions)
             
             if my_pip == 10 and opp_pip == 5:
                 return CheckAction()
@@ -150,19 +150,32 @@ class Player(Bot):
         pot_odds = self.get_pot_odds(pot, continue_cost)
 
         if our_odds > pot_odds:
-            return CheckAction() if CheckAction in legal_actions else CallAction()
+            return self.attempt_check(legal_actions)
 
         return self.attempt_fold(legal_actions)
     
 
     def get_legal_raise(self, attempt_raise, min_raise, max_raise):
+        if (random.randint(0, 15) == 7):
+            return CallAction()
         attempt = min(max_raise, max(attempt_raise, min_raise))
         return RaiseAction(amount=attempt)
+    
+
+    def attempt_check(self, legal_actions):
+        if (random.randint(0, 15) == 7):
+            return RaiseAction(random.randint(20, 30))
+        
+        return CheckAction() if CheckAction in legal_actions else CallAction()
     
 
     def attempt_fold(self, legal_actions):
         if CheckAction in legal_actions:
             return CheckAction()
+        
+        if (random.randint(0, 15) == 7):
+            return self.attempt_check(legal_actions)
+        
         if self.can_fold:
             return FoldAction()
         return CallAction()
