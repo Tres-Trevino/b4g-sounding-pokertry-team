@@ -43,7 +43,6 @@ class Player(Bot):
         '''
         
         self.can_fold = True
-        pass
 
     def handle_new_round(self, game_state, round_state, active):
         '''
@@ -65,7 +64,8 @@ class Player(Bot):
         
         if (my_bankroll < -10000):
             self.can_fold = False
-        pass
+        if (my_bankroll > 0):
+            self.can_fold = True
 
     def handle_round_over(self, game_state, terminal_state, active):
         '''
