@@ -29,6 +29,8 @@ class Player(Bot):
     A pokerbot.
     '''
     
+    
+    
     def __init__(self):
         '''
         Called when a new game starts. Called exactly once.
@@ -39,6 +41,8 @@ class Player(Bot):
         Returns:
         Nothing.
         '''
+        
+        self.can_fold = True
         pass
 
     def handle_new_round(self, game_state, round_state, active):
@@ -53,11 +57,14 @@ class Player(Bot):
         Returns:
         Nothing.
         '''
-        #my_bankroll = game_state.bankroll  # the total number of chips you've gained or lost from the beginning of the game to the start of this round
+        my_bankroll = game_state.bankroll  # the total number of chips you've gained or lost from the beginning of the game to the start of this round
         #game_clock = game_state.game_clock  # the total number of seconds your bot has left to play this game
         #round_num = game_state.round_num  # the round number from 1 to NUM_ROUNDS
         #my_cards = round_state.hands[active]  # your cards
         #big_blind = bool(active)  # True if you are the big blind
+        
+        if (my_bankroll < -10000):
+            self.can_fold = False
         pass
 
     def handle_round_over(self, game_state, terminal_state, active):
@@ -111,11 +118,11 @@ class Player(Bot):
             for s in (c[0] for c in my_cards):
                 num = "".join(my_cards).count(s)
                 if (num >= 2):
-                    return get_legal_raise(20, min_raise, max_raise)
+                    return self.get_legal_raise(20, min_raise, max_raise)
                 
             # if contains all broadway cards, good
             if all(c[0] in "AKQJT" for c in my_cards):
-                return get_legal_raise(10, min_raise, max_raise)
+                return self.get_legal_raise(10, min_raise, max_raise)
                         
             # all same suit
             all_same_suit = my_cards[0][1] == my_cards[1][1] and my_cards[1][1] == my_cards[2][1]
@@ -136,7 +143,7 @@ class Player(Bot):
         pot = my_contribution + opp_contribution
 
         if self.have_winning_hand(my_cards, board_cards):
-            return get_legal_raise(max(pot*2, my_stack), min_raise, max_raise)
+            return self.get_legal_raise(max(pot*2, my_stack), min_raise, max_raise)
 
         our_odds = self.get_hand_odds(my_cards, board_cards)
         pot_odds = self.get_pot_odds(pot, continue_cost)
@@ -150,6 +157,7 @@ class Player(Bot):
         
         attempt = min(max_raise, max(attempt_raise, min_raise))
         return RaiseAction(amount=attempt)
+    
         
 
     # this function assumes that the hand is not a winning hand
