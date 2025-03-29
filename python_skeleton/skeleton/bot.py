@@ -7,9 +7,6 @@ class Bot():
     '''
     The base class for a pokerbot.
     '''
-    
-    # Ace is ?, King is >, etc.
-    hand_trans = str.maketrans("AKQJT", "?>=<;")
 
     def handle_new_round(self, game_state, round_state, active):
         '''
