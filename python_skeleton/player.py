@@ -90,18 +90,31 @@ class Player(Bot):
         my_contribution = STARTING_STACK - my_stack  # the number of chips you have contributed to the pot
         opp_contribution = STARTING_STACK - opp_stack  # the number of chips your opponent has contributed to the pot
 
-        if RaiseAction in legal_actions:
-           min_raise, max_raise = round_state.raise_bounds()  # the smallest and largest numbers of chips for a legal bet/raise
-           min_cost = min_raise - my_pip  # the cost of a minimum bet/raise
-           max_cost = max_raise - my_pip  # the cost of a maximum bet/raise
-        if RaiseAction in legal_actions:
-            if random.random() < 0.5:
-                return RaiseAction(min_raise)
-        if CheckAction in legal_actions:  # check-call
-            return CheckAction()
-        if random.random() < 0.25:
-            return FoldAction()
-        return CallAction()  # If we can't raise, call if possible
+        # Pre-flop
+        if street == 0:
+            
+            # check for any pair
+            for s in (c[0] for c in my_cards):
+                num = "".join(my_cards).count(s)
+                if (num >= 2):
+                    return RaiseAction(amount=20) #arbitrary number
+                
+            # if contains all broadway cards, good
+            if all(c[0] in "AKQJT" for c in my_cards):
+                return RaiseAction(amount=10) #arbitrary number
+                        
+            # all same suit
+            all_same_suit = my_cards[0][1] == my_cards[1][1] and my_cards[1][1] == my_cards[2][1]
+            
+            # straight draw
+            my_cards_sorted = list(sorted(ord(c[0].translate(hand_trans)) for c in my_cards))
+            card_range = my_cards_sorted[2] - my_cards_sorted[0]
+            straight_draw = card_range <= 4
+            
+            if (straight_draw and all_same_suit):
+                return CheckAction if CheckAction in legal_actions else CallAction
+            
+            return FoldAction
 
 
 if __name__ == '__main__':
