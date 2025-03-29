@@ -9,6 +9,16 @@ from skeleton.runner import parse_args, run_bot
 
 import random
 
+def pairwise(iterable):
+    # pairwise('ABCDEFG') → AB BC CD DE EF FG
+
+    iterator = iter(iterable)
+    a = next(iterator, None)
+
+    for b in iterator:
+        yield a, b
+        a = b
+
 # Ace is ?, King is >, etc.
 HAND_TRANSFORM = str.maketrans("AKQJT", "?>=<;")
 
@@ -109,7 +119,7 @@ class Player(Bot):
             all_same_suit = my_cards[0][1] == my_cards[1][1] and my_cards[1][1] == my_cards[2][1]
             
             # straight draw
-            my_cards_sorted = list(sorted(ord(c[0].translate(HAND_TRANSFORM)) for c in my_cards))
+            my_cards_sorted = self.rank_to_ascii_sorted(my_cards)
             card_range = my_cards_sorted[2] - my_cards_sorted[0]
             straight_draw = card_range <= 4
             
@@ -118,8 +128,51 @@ class Player(Bot):
             
             return FoldAction
         
+    def have_winning_hand(self, my_cards, community_cards):
         
+        total_cards = my_cards + community_cards
+        total_cards_str = "".join(total_cards)
+        
+        rank_occurances = {s : total_cards_str.count(s) for s in (c[0] for c in total_cards)}
+            
+        if 4 in rank_occurances.values():
+            return True # we have a four of a kind
+        
+        if 3 in rank_occurances.values():
+            if 2 in rank_occurances.values():
+                return True # we have a full house
+            return True # we have a three of a kind
+        
+        # check for straight
+        ranks_sorted = self.rank_to_ascii_sorted(total_cards)
 
+        if (self.is_straight(ranks_sorted)):
+            return True # we have a straight
+            
+        # check for flush
+        suits = "hdcs"
+        for suit in suits:
+            if total_cards_str.count(suit) >= 5:
+                return True # we have a flush
+        
+        return False
+    
+    def rank_to_ascii_sorted(self, cards):
+        return list(sorted(ord(c[0].translate(HAND_TRANSFORM)) for c in cards))
+        
+    def is_straight(self, cards_sorted):
+        counter = 0
+        for a, b in pairwise(cards_sorted):
+            if b - a == 1:
+                counter += 1
+                
+                if counter == 4:
+                    return True
+            else:
+                counter = 0
+                
+        return False
+        
 
 if __name__ == '__main__':
     run_bot(Player(), parse_args())
