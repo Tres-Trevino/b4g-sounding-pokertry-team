@@ -202,6 +202,8 @@ class Player(Bot):
         if n_pairs == 1:
             return 2 / n_hidden_cards
 
+        return 0
+
 
     def get_pot_odds(self, pot, cont_cost) -> float:
         pot_pot = pot + cont_cost
