@@ -128,7 +128,9 @@ class Player(Bot):
             if (straight_draw and all_same_suit):
                 return CheckAction() if CheckAction in legal_actions else CallAction()
             
-            return FoldAction()
+            if my_pip == 10 and opp_pip == 5:
+                return CheckAction()
+            return FoldAction() 
 
         # After flop
         pot = my_contribution + opp_contribution
