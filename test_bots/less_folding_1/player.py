@@ -29,6 +29,8 @@ class Player(Bot):
     A pokerbot.
     '''
     
+    
+    
     def __init__(self):
         '''
         Called when a new game starts. Called exactly once.
@@ -41,7 +43,6 @@ class Player(Bot):
         '''
         
         self.can_fold = True
-
 
     def handle_new_round(self, game_state, round_state, active):
         '''
@@ -66,7 +67,6 @@ class Player(Bot):
         # if (my_bankroll > 0):
         #     self.can_fold = True
 
-
     def handle_round_over(self, game_state, terminal_state, active):
         '''
         Called when a round ends. Called NUM_ROUNDS times.
@@ -85,7 +85,6 @@ class Player(Bot):
         #my_cards = previous_state.hands[active]  # your cards
         #opp_cards = previous_state.hands[1-active]  # opponent's cards or [] if not revealed
         pass
-
 
     def get_action(self, game_state, round_state, active):
         '''
@@ -112,9 +111,9 @@ class Player(Bot):
         my_contribution = STARTING_STACK - my_stack  # the number of chips you have contributed to the pot
         opp_contribution = STARTING_STACK - opp_stack  # the number of chips your opponent has contributed to the pot
         min_raise, max_raise = round_state.raise_bounds()  # the smallest and largest numbers of chips for a legal bet/raise
-
         # Pre-flop
         if street == 0:
+            
             # check for any pair
             for s in (c[0] for c in my_cards):
                 num = "".join(my_cards).count(s)
@@ -133,7 +132,7 @@ class Player(Bot):
             card_range = my_cards_sorted[2] - my_cards_sorted[0]
             straight_draw = card_range <= 4
             
-            if straight_draw and all_same_suit:
+            if (straight_draw or all_same_suit):
                 return CheckAction() if CheckAction in legal_actions else CallAction()
             
             if my_pip == 10 and opp_pip == 5:
@@ -154,20 +153,18 @@ class Player(Bot):
 
         return self.attempt_fold(legal_actions)
     
-
     def get_legal_raise(self, attempt_raise, min_raise, max_raise):
         
         attempt = min(max_raise, max(attempt_raise, min_raise))
         return RaiseAction(amount=attempt)
     
-
     def attempt_fold(self, legal_actions):
         if CheckAction in legal_actions:
             return CheckAction()
         if self.can_fold:
             return FoldAction()
         return CallAction()
-
+        
 
     # this function assumes that the hand is not a winning hand
     def get_hand_odds(self, my_cards, community_cards) -> float:
@@ -215,6 +212,7 @@ class Player(Bot):
 
 
     def have_winning_hand(self, my_cards, community_cards):
+        
         total_cards = my_cards + community_cards
         total_cards_str = "".join(total_cards)
         
@@ -241,11 +239,9 @@ class Player(Bot):
         
         return False
     
-
     def rank_to_ascii_sorted(self, cards):
         return list(sorted(ord(c[0].translate(HAND_TRANSFORM)) for c in cards))
         
-
     def is_straight(self, cards_sorted):
         counter = 0
         for a, b in pairwise(cards_sorted):
@@ -258,7 +254,6 @@ class Player(Bot):
                 counter = 0
                 
         return False
-
 
 if __name__ == '__main__':
     run_bot(Player(), parse_args())
