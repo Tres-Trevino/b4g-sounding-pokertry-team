@@ -103,7 +103,7 @@ class Player(Bot):
         continue_cost = opp_pip - my_pip  # the number of chips needed to stay in the pot
         my_contribution = STARTING_STACK - my_stack  # the number of chips you have contributed to the pot
         opp_contribution = STARTING_STACK - opp_stack  # the number of chips your opponent has contributed to the pot
-
+        min_raise, max_raise = round_state.raise_bounds()  # the smallest and largest numbers of chips for a legal bet/raise
         # Pre-flop
         if street == 0:
             
@@ -111,11 +111,11 @@ class Player(Bot):
             for s in (c[0] for c in my_cards):
                 num = "".join(my_cards).count(s)
                 if (num >= 2):
-                    return RaiseAction(amount=20) #arbitrary number
+                    return get_legal_raise(20, min_raise, max_raise)
                 
             # if contains all broadway cards, good
             if all(c[0] in "AKQJT" for c in my_cards):
-                return RaiseAction(amount=10) #arbitrary number
+                return get_legal_raise(10, min_raise, max_raise)
                         
             # all same suit
             all_same_suit = my_cards[0][1] == my_cards[1][1] and my_cards[1][1] == my_cards[2][1]
@@ -136,7 +136,7 @@ class Player(Bot):
         pot = my_contribution + opp_contribution
 
         if self.have_winning_hand(my_cards, board_cards):
-            return RaiseAction(amount=max(pot*2, my_stack))
+            return get_legal_raise(max(pot*2, my_stack), min_raise, max_raise)
 
         our_odds = self.get_hand_odds(my_cards, board_cards)
         pot_odds = self.get_pot_odds(pot, continue_cost)
@@ -145,6 +145,11 @@ class Player(Bot):
             return CheckAction() if CheckAction in legal_actions else CallAction()
 
         return FoldAction()
+    
+    def get_legal_raise(self, attempt_raise, min_raise, max_raise):
+        
+        attempt = min(max_raise, max(attempt_raise, min_raise))
+        return RaiseAction(amount=attempt)
         
 
     # this function assumes that the hand is not a winning hand
