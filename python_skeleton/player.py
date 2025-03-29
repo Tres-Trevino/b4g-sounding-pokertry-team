@@ -14,6 +14,9 @@ class Player(Bot):
     '''
     A pokerbot.
     '''
+    
+    # Ace is ?, King is >, etc.
+    HAND_TRANSFORM = str.maketrans("AKQJT", "?>=<;")
 
     def __init__(self):
         '''
@@ -107,7 +110,7 @@ class Player(Bot):
             all_same_suit = my_cards[0][1] == my_cards[1][1] and my_cards[1][1] == my_cards[2][1]
             
             # straight draw
-            my_cards_sorted = list(sorted(ord(c[0].translate(hand_trans)) for c in my_cards))
+            my_cards_sorted = list(sorted(ord(c[0].translate(HAND_TRANSFORM)) for c in my_cards))
             card_range = my_cards_sorted[2] - my_cards_sorted[0]
             straight_draw = card_range <= 4
             
@@ -115,6 +118,8 @@ class Player(Bot):
                 return CheckAction if CheckAction in legal_actions else CallAction
             
             return FoldAction
+        
+        
 
 
 if __name__ == '__main__':
