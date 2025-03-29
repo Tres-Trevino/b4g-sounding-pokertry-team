@@ -137,7 +137,7 @@ class Player(Bot):
             
             if my_pip == 10 and opp_pip == 5:
                 return CheckAction()
-            return FoldAction() 
+            return self.attempt_fold(legal_actions)
 
         # After flop
         pot = my_contribution + opp_contribution
@@ -151,13 +151,18 @@ class Player(Bot):
         if our_odds > pot_odds:
             return CheckAction() if CheckAction in legal_actions else CallAction()
 
-        return FoldAction()
+        return self.attempt_fold(legal_actions)
     
     def get_legal_raise(self, attempt_raise, min_raise, max_raise):
         
         attempt = min(max_raise, max(attempt_raise, min_raise))
         return RaiseAction(amount=attempt)
     
+    def attempt_fold(self, legal_actions):
+        
+        if self.can_fold:
+            return FoldAction()
+        return CheckAction() if CheckAction in legal_actions else CallAction()
         
 
     # this function assumes that the hand is not a winning hand
@@ -246,7 +251,6 @@ class Player(Bot):
                 counter = 0
                 
         return False
-        
 
 if __name__ == '__main__':
     run_bot(Player(), parse_args())
