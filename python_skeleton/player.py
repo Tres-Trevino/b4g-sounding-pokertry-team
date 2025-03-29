@@ -126,9 +126,23 @@ class Player(Bot):
             straight_draw = card_range <= 4
             
             if (straight_draw and all_same_suit):
-                return CheckAction if CheckAction in legal_actions else CallAction
+                return CheckAction() if CheckAction in legal_actions else CallAction()
             
-            return FoldAction
+            return FoldAction()
+
+        # After flop
+        pot = my_contribution + opp_contribution
+
+        if self.have_winning_hand(my_cards, board_cards):
+            return RaiseAction(amount=max(pot*2, my_stack))
+
+        our_odds = self.get_hand_odds(my_cards, board_cards)
+        pot_odds = self.get_pot_odds(pot, continue_cost)
+
+        if our_odds > pot_odds:
+            return CheckAction() if CheckAction in legal_actions else CallAction()
+
+        return FoldAction()
         
 
     # this function assumes that the hand is not a winning hand
@@ -169,11 +183,10 @@ class Player(Bot):
             return 2 / n_hidden_cards
 
 
-
-    def get_pot_odds(self, my_contrib, opp_contrib, cont_cost) -> float:
-        pot = my_contrib + opp_contrib
+    def get_pot_odds(self, pot, cont_cost) -> float:
         pot_pot = pot + cont_cost
         return cont_cost / pot_pot
+
 
     def have_winning_hand(self, my_cards, community_cards):
         
