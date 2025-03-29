@@ -61,10 +61,10 @@ class Player(Bot):
         #my_cards = round_state.hands[active]  # your cards
         #big_blind = bool(active)  # True if you are the big blind
         
-        # if (my_bankroll < -10000):
-        #     self.can_fold = False
-        # if (my_bankroll > 0):
-        #     self.can_fold = True
+        if (my_bankroll < -10000):
+            self.can_fold = False
+        if (my_bankroll > 0):
+            self.can_fold = True
 
 
     def handle_round_over(self, game_state, terminal_state, active):
@@ -156,7 +156,6 @@ class Player(Bot):
     
 
     def get_legal_raise(self, attempt_raise, min_raise, max_raise):
-        
         attempt = min(max_raise, max(attempt_raise, min_raise))
         return RaiseAction(amount=attempt)
     
